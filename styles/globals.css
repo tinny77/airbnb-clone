@@ -4,17 +4,22 @@
 
 @layer utilities {
 
-    /* Hide scrollbar for Chrome, Safari and Opera */
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
 
-    /* Hide scrollbar for IE, Edge and Firefox */
     .no-scrollbar {
         -ms-overflow-style: none;
-        /* IE and Edge */
         scrollbar-width: none;
-        /* Firefox */
+    }
+}
+
+@layer components {
+    .app-container {
+        @apply max-w-7xl mx-auto;
+    }
+    .search-small-top-button {
+        @apply border text-xs lg:text-sm select-none px-3 py-1 rounded-full shadow hover:shadow-md cursor-pointer active:bg-gray-100 active:scale-95 ease-out transition transform;
     }
 }
 
@@ -22,3 +27,9 @@ body {
     color: #1f1f1f;
     background: #fff;
 }
+
+/* DateRange */
+header .rdrDayToday .rdrDayNumber {
+    font-weight:600;
+}
+header .rdrDayToday .rdrDayNumber span:after {background: #1f1f1f; width:5px;height:5px;border-radius:50%;top:20px}

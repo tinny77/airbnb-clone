@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 function LargeCard({ img, title, description, buttonText }) {
 	return (
-		<section className="pt-6 relative py-16 cusror-pointer">
+		<section className="pt-10 relative py-16 cusror-pointer">
 			<div className="relative h-96 min-w-[20px]">
 				<Image
 					src={img}

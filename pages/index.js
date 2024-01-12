@@ -20,7 +20,7 @@ export default function Home({ exploreData, cardsData }) {
 			<Header />
 			<HeaderBanner />
 
-			<main className="max-w-7xl mx-auto px-4 md:px-8">
+			<main className="app-container px-4 md:px-8">
 				<section className="pt-6">
 					<h2 className="text-3xl lg:text-4xl font-semibold pb-5 mt-2">
 						Explore Nearby
