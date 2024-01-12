@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
 	GlobeAltIcon,
 	Bars3Icon,
@@ -13,11 +13,13 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { DateRangePicker } from 'react-date-range';
 
-function Header() {
+function Header({ placeholder = 'Start your search', canStartOpened = true }) {
 	const router = useRouter();
 	const [searchInput, setSearchInput] = useState('');
+	const [openedCalendar, setOpenedCalendar] = useState(false);
 	const handleSearchInput = (e) => {
 		setSearchInput(e.target.value);
+		e.target.value === '' ? setOpenedCalendar(false) : setOpenedCalendar(true);
 	};
 	const [startDate, setStartDate] = useState(new Date());
 	const [endDate, setEndDate] = useState(new Date());
@@ -37,8 +39,10 @@ function Header() {
 	const resetInputs = () => {
 		setSearchInput('');
 		setNumOfGuests(1);
+		setOpenedCalendar(false);
 	};
 	const search = () => {
+		setOpenedCalendar(false);
 		router.push({
 			pathname: '/search',
 			query: {
@@ -50,6 +54,8 @@ function Header() {
 		});
 		//resetInputs();
 	};
+
+	useEffect(() => {}, []);
 	return (
 		<header className="sticky top-0 z-50 grid grid-cols-[60px_minmax(200px,_1fr)_180px] md:grid-cols-[170px_minmax(200px,_1fr)_195px] lg:grid-cols-[170px_minmax(200px,_1fr)_300px] bg-white shadow-md p-5 md:px-10">
 			<div
@@ -82,7 +88,7 @@ function Header() {
 				<input
 					className="flex-grow  bg-transparent outline-none text-sm text-gray-600 placeholder-gray-400"
 					type="text"
-					placeholder="Start your search"
+					placeholder={placeholder}
 					value={searchInput}
 					onChange={handleSearchInput}
 				/>
@@ -98,42 +104,45 @@ function Header() {
 					<UserCircleIcon className="h-6" />
 				</div>
 			</div>
-			{searchInput && (
-				<div className="flex flex-col col-span-4 mx-auto pt-6">
-					<DateRangePicker
-						ranges={[dateSelectionRange]}
-						onChange={handleDateSelection}
-						minDate={new Date()}
-						rangeColors={['#FD5B61']}
+
+			<div
+				className={`flex flex-col col-span-4 mx-auto pt-6 ${
+					!openedCalendar && 'hidden'
+				}`}
+			>
+				<DateRangePicker
+					ranges={[dateSelectionRange]}
+					onChange={handleDateSelection}
+					minDate={new Date()}
+					rangeColors={['#FD5B61']}
+				/>
+				<div className="pt-4 flex items-center border-t">
+					<h2 className="text-base lg:text-lg font-semibold flex-grow">
+						Number of Guests
+					</h2>
+					{Number(numOfGuests) === 1 ? (
+						<UserIcon className="h-5" />
+					) : (
+						<UsersIcon className="h-5" />
+					)}
+					<input
+						type="number"
+						className="w-12 pl-2 text-lg outline-none text-red-400"
+						max="50"
+						min="1"
+						value={numOfGuests}
+						onChange={handleGuestsNum}
 					/>
-					<div className="pt-4 flex items-center border-t">
-						<h2 className="text-base lg:text-lg font-semibold flex-grow">
-							Number of Guests
-						</h2>
-						{Number(numOfGuests) === 1 ? (
-							<UserIcon className="h-5" />
-						) : (
-							<UsersIcon className="h-5" />
-						)}
-						<input
-							type="number"
-							className="w-12 pl-2 text-lg outline-none text-red-400"
-							max="50"
-							min="1"
-							value={numOfGuests}
-							onChange={handleGuestsNum}
-						/>
-					</div>
-					<div className="flex mt-4 pt-3 border-t">
-						<button className="flex-grow text-gray-500" onClick={resetInputs}>
-							Cancel
-						</button>
-						<button className="flex-grow text-red-400" onClick={search}>
-							Search
-						</button>
-					</div>
 				</div>
-			)}
+				<div className="flex mt-4 pt-3 border-t">
+					<button className="flex-grow text-gray-500" onClick={resetInputs}>
+						Cancel
+					</button>
+					<button className="flex-grow text-red-400" onClick={search}>
+						Search
+					</button>
+				</div>
+			</div>
 		</header>
 	);
 }

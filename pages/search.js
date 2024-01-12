@@ -1,4 +1,3 @@
-import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/router';
 import { format, parseISO, isSameDay } from 'date-fns';
@@ -7,7 +6,7 @@ function BoldText({ children }) {
 	return <strong style={{ fontWeight: 'bold' }}>{children}</strong>;
 }
 
-function search() {
+function Search() {
 	const router = useRouter();
 	const { location, guests, start, end } = router.query;
 	const rangeFrom = start ? format(parseISO(start), 'MMMM dd yyyy') : '';
@@ -30,9 +29,7 @@ function search() {
 	}
 
 	return (
-		<div>
-			<Header />
-
+		<>
 			<main className="flex">
 				<section className="flex-grow px-6 pt-8">
 					<p className="text-xs ">
@@ -52,8 +49,8 @@ function search() {
 			</main>
 
 			<Footer />
-		</div>
+		</>
 	);
 }
 
-export default search;
+export default Search;

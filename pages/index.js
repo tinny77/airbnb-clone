@@ -1,7 +1,4 @@
-import Image from 'next/image';
 import { Inter } from 'next/font/google';
-import Head from 'next/head';
-import Header from '@/components/Header';
 import HeaderBanner from '@/components/HeaderBanner';
 import SmallCard from '@/components/SmallCard';
 import MediumCard from '@/components/MediumCard';
@@ -12,12 +9,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export default function Home({ exploreData, cardsData }) {
 	return (
-		<div>
-			<Head>
-				<title>Airbnb clone</title>
-				<link rel="icon" href="/favicon.ico" />
-			</Head>
-			<Header />
+		<>
 			<HeaderBanner />
 
 			<main className="app-container px-4 md:px-8">
@@ -52,7 +44,7 @@ export default function Home({ exploreData, cardsData }) {
 			</main>
 
 			<Footer />
-		</div>
+		</>
 	);
 }
 
