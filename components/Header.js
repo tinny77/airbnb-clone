@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
 	GlobeAltIcon,
 	Bars3Icon,
@@ -13,13 +13,81 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { DateRangePicker } from 'react-date-range';
 
-function Header({ placeholder = 'Start your search', canStartOpened = true }) {
+function Header({ placeholder = 'Start your search' }) {
 	const router = useRouter();
+	const { location } = router.query;
+
 	const [searchInput, setSearchInput] = useState('');
 	const [openedCalendar, setOpenedCalendar] = useState(false);
+
+	const inputRef = useRef(null);
+	const dropdownRef = useRef(null);
+	const [autocompleteResults, setAutocompleteResults] = useState([]);
+	const famousCities = [
+		'Amsterdam',
+		'Athens',
+		'Auckland',
+		'Bangkok',
+		'Barcelona',
+		'Beijing',
+		'Berlin',
+		'Brisbane',
+		'Buenos Aires',
+		'Budapest',
+		'Cairo',
+		'Cape Town',
+		'Copenhagen',
+		'Dubai',
+		'Dublin',
+		'Edinburgh',
+		'Florence',
+		'Helsinki',
+		'Hong Kong',
+		'Istanbul',
+		'Johannesburg',
+		'Kyoto',
+		'Lisbon',
+		'London',
+		'Madrid',
+		'Mexico City',
+		'Moscow',
+		'Mumbai',
+		'Munich',
+		'Nairobi',
+		'New York',
+		'Oslo',
+		'Paris',
+		'Prague',
+		'Rio de Janeiro',
+		'Rome',
+		'Seoul',
+		'Singapore',
+		'Stockholm',
+		'Sydney',
+		'Tokyo',
+		'Toronto',
+		'Vancouver',
+		'Vienna',
+		'Warsaw',
+		'Wellington',
+		'Zurich',
+	];
+	useEffect(() => {
+		// If the input element exists, adjust the top position of the autocomplete dropdown
+		if (inputRef.current && dropdownRef.current) {
+			const inputHeight = inputRef.current.offsetHeight;
+			dropdownRef.current.style.top = `${inputHeight}px`;
+		}
+	}, [autocompleteResults]);
+
 	const handleSearchInput = (e) => {
-		setSearchInput(e.target.value);
-		e.target.value === '' ? setOpenedCalendar(false) : setOpenedCalendar(true);
+		const inputValue = e.target.value;
+		setSearchInput(inputValue);
+		const filteredCities = famousCities.filter((city) =>
+			city.toLowerCase().includes(inputValue.toLowerCase())
+		);
+		setAutocompleteResults(filteredCities);
+		inputValue === '' ? setOpenedCalendar(false) : setOpenedCalendar(true);
 	};
 	const [startDate, setStartDate] = useState(new Date());
 	const [endDate, setEndDate] = useState(new Date());
@@ -41,7 +109,8 @@ function Header({ placeholder = 'Start your search', canStartOpened = true }) {
 		setNumOfGuests(1);
 		setOpenedCalendar(false);
 	};
-	const search = () => {
+	const search = (e) => {
+		e.preventDefault();
 		setOpenedCalendar(false);
 		router.push({
 			pathname: '/search',
@@ -54,8 +123,14 @@ function Header({ placeholder = 'Start your search', canStartOpened = true }) {
 		});
 		//resetInputs();
 	};
+	const handleAutocompleteSelect = (selectedCity) => {
+		setSearchInput(selectedCity);
+		setAutocompleteResults([]);
+	};
 
-	useEffect(() => {}, []);
+	useEffect(() => {
+		location && setSearchInput(location);
+	}, []);
 	return (
 		<header className="sticky top-0 z-50 grid grid-cols-[60px_minmax(200px,_1fr)_180px] md:grid-cols-[170px_minmax(200px,_1fr)_195px] lg:grid-cols-[170px_minmax(200px,_1fr)_300px] bg-white shadow-md p-5 md:px-10">
 			<div
@@ -84,18 +159,44 @@ function Header({ placeholder = 'Start your search', canStartOpened = true }) {
 					className="md:hidden"
 				/>
 			</div>
-			<div className="flex items-center border rounded-full py-2 shadow md:shadow-md pl-4">
+			<form
+				className="flex items-center border rounded-full py-2 shadow md:shadow-md pl-4 relative"
+				onSubmit={search}
+			>
 				<input
 					className="flex-grow  bg-transparent outline-none text-sm text-gray-600 placeholder-gray-400"
 					type="text"
 					placeholder={placeholder}
 					value={searchInput}
 					onChange={handleSearchInput}
+					onClick={() => setOpenedCalendar(true)}
+					ref={inputRef}
 				/>
-				<span className="shrink-0 md:inline-flex pr-2">
-					<MagnifyingGlassCircleIcon className="h-8 text-red-400 cursor-pointer" />
-				</span>
-			</div>
+				<button className="shrink-0 md:inline-flex pr-2" type="submit">
+					<MagnifyingGlassCircleIcon
+						className="h-8 text-red-400 cursor-pointer"
+						onClick={search}
+					/>
+				</button>
+				{/* Autocomplete dropdown */}
+				{autocompleteResults.length > 0 && searchInput.length > 2 && (
+					<div
+						ref={dropdownRef}
+						className="absolute mt-10 -ml-4 bg-white w-full border border-gray-200 rounded-lg text-sm overflow-auto max-h-40 z-50"
+					>
+						{autocompleteResults.map((result) => (
+							<div
+								key={result}
+								className="px-2 py-1 cursor-pointer hover:bg-gray-200 odd:bg-gray-100"
+								onClick={() => handleAutocompleteSelect(result)}
+							>
+								{result}
+							</div>
+						))}
+					</div>
+				)}
+			</form>
+
 			<div className="flex items-center space-x-4 justify-end text-gray-500">
 				<p className="hidden lg:inline text-sm">Become a host</p>
 				<GlobeAltIcon className="h-6" />
@@ -108,6 +209,10 @@ function Header({ placeholder = 'Start your search', canStartOpened = true }) {
 			<div
 				className={`flex flex-col col-span-4 mx-auto pt-6 ${
 					!openedCalendar && 'hidden'
+				} ${
+					autocompleteResults.length > 0 &&
+					searchInput.length > 2 &&
+					'opacity-90 blur-sm transform transition duration-200 pointer-events-none'
 				}`}
 			>
 				<DateRangePicker
