@@ -131,8 +131,29 @@ function Header({ placeholder = 'Start your search' }) {
 	useEffect(() => {
 		location && setSearchInput(location);
 	}, []);
+	const headerRef = useRef(null);
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (
+				headerRef.current &&
+				!headerRef.current.contains(event.target) &&
+				event.target !== inputRef.current
+			) {
+				setOpenedCalendar(false);
+			}
+		};
+
+		document.addEventListener('click', handleClickOutside);
+
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+		};
+	}, []);
 	return (
-		<header className="sticky top-0 z-50 grid grid-cols-[60px_minmax(200px,_1fr)_180px] md:grid-cols-[170px_minmax(200px,_1fr)_195px] lg:grid-cols-[170px_minmax(200px,_1fr)_300px] bg-white shadow-md p-5 md:px-10">
+		<header
+			className="sticky top-0 z-50 grid grid-cols-[60px_minmax(200px,_1fr)_180px] md:grid-cols-[170px_minmax(200px,_1fr)_195px] lg:grid-cols-[170px_minmax(200px,_1fr)_300px] bg-white shadow-md p-5 md:px-10"
+			ref={headerRef}
+		>
 			<div
 				className="relative flex items-center h-10 cursor-pointer my-auto"
 				onClick={() => router.push('/')}
@@ -145,7 +166,7 @@ function Header({ placeholder = 'Start your search' }) {
 						objectPosition: 'left',
 					}}
 					fill
-					className="hidden md:inline"
+					className="hidden md:inline cursor-pointer"
 				/>
 				<Image
 					src="/logo-sm.png"
@@ -156,7 +177,7 @@ function Header({ placeholder = 'Start your search' }) {
 					}}
 					width={37}
 					height={40}
-					className="md:hidden"
+					className="md:hidden cursor-pointer"
 				/>
 			</div>
 			<form

@@ -28,6 +28,9 @@ body {
     background: #fff;
 }
 
+.progressbar {top:90px !important}
+.progressbar .glow {display:none}
+
 /* DateRange */
 header .rdrDayToday .rdrDayNumber {
     font-weight:600;
