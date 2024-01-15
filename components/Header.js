@@ -23,55 +23,7 @@ function Header({ placeholder = 'Start your search' }) {
 	const inputRef = useRef(null);
 	const dropdownRef = useRef(null);
 	const [autocompleteResults, setAutocompleteResults] = useState([]);
-	const famousCities = [
-		'Amsterdam',
-		'Athens',
-		'Auckland',
-		'Bangkok',
-		'Barcelona',
-		'Beijing',
-		'Berlin',
-		'Brisbane',
-		'Buenos Aires',
-		'Budapest',
-		'Cairo',
-		'Cape Town',
-		'Copenhagen',
-		'Dubai',
-		'Dublin',
-		'Edinburgh',
-		'Florence',
-		'Helsinki',
-		'Hong Kong',
-		'Istanbul',
-		'Johannesburg',
-		'Kyoto',
-		'Lisbon',
-		'London',
-		'Madrid',
-		'Mexico City',
-		'Moscow',
-		'Mumbai',
-		'Munich',
-		'Nairobi',
-		'New York',
-		'Oslo',
-		'Paris',
-		'Prague',
-		'Rio de Janeiro',
-		'Rome',
-		'Seoul',
-		'Singapore',
-		'Stockholm',
-		'Sydney',
-		'Tokyo',
-		'Toronto',
-		'Vancouver',
-		'Vienna',
-		'Warsaw',
-		'Wellington',
-		'Zurich',
-	];
+
 	useEffect(() => {
 		// If the input element exists, adjust the top position of the autocomplete dropdown
 		if (inputRef.current && dropdownRef.current) {
@@ -80,14 +32,41 @@ function Header({ placeholder = 'Start your search' }) {
 		}
 	}, [autocompleteResults]);
 
+	let timeoutId;
+
 	const handleSearchInput = (e) => {
 		const inputValue = e.target.value;
 		setSearchInput(inputValue);
-		const filteredCities = famousCities.filter((city) =>
-			city.toLowerCase().includes(inputValue.toLowerCase())
-		);
-		setAutocompleteResults(filteredCities);
-		inputValue === '' ? setOpenedCalendar(false) : setOpenedCalendar(true);
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+		}
+		timeoutId = setTimeout(async () => {
+			if (inputValue.length > 2) {
+				try {
+					const response = await fetch(
+						`https://api.api-ninjas.com/v1/city?limit=30&name=${inputValue}`,
+						{
+							headers: {
+								'X-Api-Key': 'hCfuFYpaJzIIA0xf+VsPaQ==1VBzD8rnpAipUUbn',
+							},
+						}
+					);
+					if (response.ok) {
+						const data = await response.json();
+						const cityNames = [...new Set(data.map((city) => city.name))];
+						setAutocompleteResults(cityNames);
+						setOpenedCalendar(true);
+					} else {
+						throw new Error('Failed to fetch data');
+					}
+				} catch (error) {
+					console.error(error);
+				}
+			} else {
+				setAutocompleteResults([]);
+				setOpenedCalendar(false);
+			}
+		}, 250);
 	};
 	const [startDate, setStartDate] = useState(new Date());
 	const [endDate, setEndDate] = useState(new Date());
@@ -125,35 +104,16 @@ function Header({ placeholder = 'Start your search' }) {
 	};
 	const handleAutocompleteSelect = (selectedCity) => {
 		setSearchInput(selectedCity);
+		setOpenedCalendar(true);
 		setAutocompleteResults([]);
 	};
 
 	useEffect(() => {
 		location && setSearchInput(location);
 	}, []);
-	const headerRef = useRef(null);
-	useEffect(() => {
-		const handleClickOutside = (event) => {
-			if (
-				headerRef.current &&
-				!headerRef.current.contains(event.target) &&
-				event.target !== inputRef.current
-			) {
-				setOpenedCalendar(false);
-			}
-		};
 
-		document.addEventListener('click', handleClickOutside);
-
-		return () => {
-			document.removeEventListener('click', handleClickOutside);
-		};
-	}, []);
 	return (
-		<header
-			className="sticky top-0 z-50 grid grid-cols-[60px_minmax(200px,_1fr)_180px] md:grid-cols-[170px_minmax(200px,_1fr)_195px] lg:grid-cols-[170px_minmax(200px,_1fr)_300px] bg-white shadow-md p-5 md:px-10"
-			ref={headerRef}
-		>
+		<header className="sticky top-0 z-50 grid grid-cols-[60px_minmax(200px,_1fr)_180px] md:grid-cols-[170px_minmax(200px,_1fr)_195px] lg:grid-cols-[170px_minmax(200px,_1fr)_300px] bg-white shadow-md p-5 md:px-10">
 			<div
 				className="relative flex items-center h-10 cursor-pointer my-auto"
 				onClick={() => router.push('/')}
